@@ -1,0 +1,32 @@
+## Ignore Visual Studio Temporary Files and Build Output
+[Db]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+
+## Ignore Visual Studio Cache and Preferences
+.vs/
+/.vs/
+HoverAlls/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.clw
+*.ncb
+*.pif
+*.scc
+*.aps
+
+## Ignore OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## Ignore Rider/JetBrains specific files if used
+.idea/
+
+## Ignore VS Code files if used
+.vscode/
