@@ -30,7 +30,7 @@
         {
             clientes = new TabControl();
             tabPage1 = new TabPage();
-            clientes_cadastrados = new ListBox();
+            lstClientes = new ListBox();
             btnCadastrarCliente = new Button();
             txtContatoCliente = new TextBox();
             txtNomeCliente = new TextBox();
@@ -46,13 +46,16 @@
             label4 = new Label();
             label3 = new Label();
             tabPage3 = new TabPage();
+            btnAplicarUpgrade = new Button();
+            txtNovaPeca = new ListBox();
+            lstPecasAtuais = new ListBox();
             label5 = new Label();
             cmbSetupsUpgrade = new ComboBox();
             tabPage4 = new TabPage();
             lstLocacoes = new ListBox();
             btnDevolver = new Button();
             btnRegistrarLocacao = new Button();
-            dateTimePicker1 = new DateTimePicker();
+            dtpDevolucao = new DateTimePicker();
             dtpRetirada = new DateTimePicker();
             label10 = new Label();
             label9 = new Label();
@@ -60,9 +63,6 @@
             label7 = new Label();
             cmbItens = new ComboBox();
             cmbClientes = new ComboBox();
-            lstPecasAtuais = new ListBox();
-            txtNovaPeca = new ListBox();
-            btnAplicarUpgrade = new Button();
             clientes.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -85,7 +85,7 @@
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(clientes_cadastrados);
+            tabPage1.Controls.Add(lstClientes);
             tabPage1.Controls.Add(btnCadastrarCliente);
             tabPage1.Controls.Add(txtContatoCliente);
             tabPage1.Controls.Add(txtNomeCliente);
@@ -99,12 +99,12 @@
             tabPage1.Text = "clientes";
             tabPage1.UseVisualStyleBackColor = true;
             // 
-            // clientes_cadastrados
+            // lstClientes
             // 
-            clientes_cadastrados.Location = new Point(536, 46);
-            clientes_cadastrados.Name = "clientes_cadastrados";
-            clientes_cadastrados.Size = new Size(266, 464);
-            clientes_cadastrados.TabIndex = 0;
+            lstClientes.Location = new Point(536, 46);
+            lstClientes.Name = "lstClientes";
+            lstClientes.Size = new Size(266, 464);
+            lstClientes.TabIndex = 0;
             // 
             // btnCadastrarCliente
             // 
@@ -114,7 +114,7 @@
             btnCadastrarCliente.TabIndex = 2;
             btnCadastrarCliente.Text = "cadastrar cliente";
             btnCadastrarCliente.UseVisualStyleBackColor = true;
-            //btnCadastrarCliente.Click += button1_Click;
+            btnCadastrarCliente.Click += btnCadastrarCliente_Click;
             // 
             // txtContatoCliente
             // 
@@ -124,7 +124,6 @@
             txtContatoCliente.PlaceholderText = "(99) 9 9999-9999";
             txtContatoCliente.Size = new Size(133, 27);
             txtContatoCliente.TabIndex = 1;
-            //txtContatoCliente.TextChanged += txtContatoCliente_TextChanged;
             // 
             // txtNomeCliente
             // 
@@ -173,42 +172,42 @@
             // lstItens
             // 
             lstItens.FormattingEnabled = true;
-            lstItens.Location = new Point(718, 35);
+            lstItens.Location = new Point(581, 70);
             lstItens.Name = "lstItens";
-            lstItens.Size = new Size(150, 104);
+            lstItens.Size = new Size(150, 384);
             lstItens.TabIndex = 4;
             // 
             // btnCadastrarItem
             // 
-            btnCadastrarItem.Location = new Point(221, 387);
+            btnCadastrarItem.Location = new Point(405, 430);
             btnCadastrarItem.Name = "btnCadastrarItem";
             btnCadastrarItem.Size = new Size(94, 29);
             btnCadastrarItem.TabIndex = 3;
-            btnCadastrarItem.Text = "button1";
+            btnCadastrarItem.Text = "cadastrar";
             btnCadastrarItem.UseVisualStyleBackColor = true;
+            btnCadastrarItem.Click += btnCadastrarItem_Click;
             // 
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(49, 120);
+            label6.Location = new Point(233, 163);
             label6.Name = "label6";
             label6.Size = new Size(99, 20);
             label6.TabIndex = 2;
             label6.Text = "componentes";
-            //label6.Click += label6_Click;
             // 
             // txtComponentesIniciais
             // 
-            txtComponentesIniciais.Location = new Point(216, 120);
+            txtComponentesIniciais.Location = new Point(400, 163);
             txtComponentesIniciais.Multiline = true;
             txtComponentesIniciais.Name = "txtComponentesIniciais";
+            txtComponentesIniciais.PlaceholderText = "RTX 5070, 32gb DDR5";
             txtComponentesIniciais.Size = new Size(125, 231);
             txtComponentesIniciais.TabIndex = 1;
-            //txtComponentesIniciais.TextChanged += textBox1_TextChanged;
             // 
             // txtValorDiario
             // 
-            txtValorDiario.Location = new Point(216, 73);
+            txtValorDiario.Location = new Point(400, 116);
             txtValorDiario.Name = "txtValorDiario";
             txtValorDiario.PlaceholderText = "R$ 10,00";
             txtValorDiario.Size = new Size(125, 27);
@@ -216,7 +215,7 @@
             // 
             // txtNomeItem
             // 
-            txtNomeItem.Location = new Point(216, 27);
+            txtNomeItem.Location = new Point(400, 70);
             txtNomeItem.Name = "txtNomeItem";
             txtNomeItem.PlaceholderText = "SETUP 1 ";
             txtNomeItem.Size = new Size(125, 27);
@@ -225,7 +224,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(49, 73);
+            label4.Location = new Point(233, 116);
             label4.Name = "label4";
             label4.Size = new Size(119, 20);
             label4.TabIndex = 0;
@@ -234,12 +233,11 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(49, 34);
+            label3.Location = new Point(233, 77);
             label3.Name = "label3";
             label3.Size = new Size(93, 20);
             label3.TabIndex = 0;
             label3.Text = "Nome do PC";
-            //label3.Click += label3_Click;
             // 
             // tabPage3
             // 
@@ -256,31 +254,58 @@
             tabPage3.Text = "upgrade";
             tabPage3.UseVisualStyleBackColor = true;
             // 
+            // btnAplicarUpgrade
+            // 
+            btnAplicarUpgrade.Location = new Point(431, 259);
+            btnAplicarUpgrade.Name = "btnAplicarUpgrade";
+            btnAplicarUpgrade.Size = new Size(152, 85);
+            btnAplicarUpgrade.TabIndex = 3;
+            btnAplicarUpgrade.Text = "aplicar";
+            btnAplicarUpgrade.UseVisualStyleBackColor = true;
+            btnAplicarUpgrade.Click += btnAplicarUpgrade_Click;
+            // 
+            // txtNovaPeca
+            // 
+            txtNovaPeca.FormattingEnabled = true;
+            txtNovaPeca.Location = new Point(661, 140);
+            txtNovaPeca.Name = "txtNovaPeca";
+            txtNovaPeca.Size = new Size(150, 244);
+            txtNovaPeca.TabIndex = 2;
+            // 
+            // lstPecasAtuais
+            // 
+            lstPecasAtuais.FormattingEnabled = true;
+            lstPecasAtuais.Location = new Point(199, 140);
+            lstPecasAtuais.Name = "lstPecasAtuais";
+            lstPecasAtuais.Size = new Size(150, 244);
+            lstPecasAtuais.TabIndex = 2;
+            // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(38, 105);
+            label5.Location = new Point(451, 157);
             label5.Name = "label5";
-            label5.Size = new Size(50, 20);
+            label5.Size = new Size(104, 20);
             label5.TabIndex = 1;
-            label5.Text = "label5";
+            label5.Text = "selecione o pc";
             label5.Visible = false;
             // 
             // cmbSetupsUpgrade
             // 
             cmbSetupsUpgrade.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbSetupsUpgrade.FormattingEnabled = true;
-            cmbSetupsUpgrade.Location = new Point(30, 40);
+            cmbSetupsUpgrade.Location = new Point(431, 193);
             cmbSetupsUpgrade.Name = "cmbSetupsUpgrade";
             cmbSetupsUpgrade.Size = new Size(151, 28);
             cmbSetupsUpgrade.TabIndex = 0;
+            cmbSetupsUpgrade.SelectedIndexChanged += cmbSetupsUpgrade_SelectedIndexChanged;
             // 
             // tabPage4
             // 
             tabPage4.Controls.Add(lstLocacoes);
             tabPage4.Controls.Add(btnDevolver);
             tabPage4.Controls.Add(btnRegistrarLocacao);
-            tabPage4.Controls.Add(dateTimePicker1);
+            tabPage4.Controls.Add(dtpDevolucao);
             tabPage4.Controls.Add(dtpRetirada);
             tabPage4.Controls.Add(label10);
             tabPage4.Controls.Add(label9);
@@ -299,41 +324,43 @@
             // lstLocacoes
             // 
             lstLocacoes.FormattingEnabled = true;
-            lstLocacoes.Location = new Point(711, 46);
+            lstLocacoes.Location = new Point(461, 65);
             lstLocacoes.Name = "lstLocacoes";
-            lstLocacoes.Size = new Size(150, 104);
+            lstLocacoes.Size = new Size(150, 324);
             lstLocacoes.TabIndex = 4;
             // 
             // btnDevolver
             // 
-            btnDevolver.Location = new Point(309, 357);
+            btnDevolver.Location = new Point(710, 228);
             btnDevolver.Name = "btnDevolver";
             btnDevolver.Size = new Size(265, 29);
             btnDevolver.TabIndex = 3;
             btnDevolver.Text = "registrar devolucao";
             btnDevolver.UseVisualStyleBackColor = true;
+            btnDevolver.Click += btnDevolver_Click;
             // 
             // btnRegistrarLocacao
             // 
-            btnRegistrarLocacao.Location = new Point(113, 357);
+            btnRegistrarLocacao.Location = new Point(173, 294);
             btnRegistrarLocacao.Name = "btnRegistrarLocacao";
-            btnRegistrarLocacao.Size = new Size(94, 29);
+            btnRegistrarLocacao.Size = new Size(226, 72);
             btnRegistrarLocacao.TabIndex = 3;
             btnRegistrarLocacao.Text = "registrar";
             btnRegistrarLocacao.UseVisualStyleBackColor = true;
+            btnRegistrarLocacao.Click += btnRegistrarLocacao_Click;
             // 
-            // dateTimePicker1
+            // dtpDevolucao
             // 
-            dateTimePicker1.Format = DateTimePickerFormat.Short;
-            dateTimePicker1.Location = new Point(207, 261);
-            dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(148, 27);
-            dateTimePicker1.TabIndex = 2;
+            dtpDevolucao.Format = DateTimePickerFormat.Short;
+            dtpDevolucao.Location = new Point(815, 165);
+            dtpDevolucao.Name = "dtpDevolucao";
+            dtpDevolucao.Size = new Size(148, 27);
+            dtpDevolucao.TabIndex = 2;
             // 
             // dtpRetirada
             // 
             dtpRetirada.Format = DateTimePickerFormat.Short;
-            dtpRetirada.Location = new Point(207, 194);
+            dtpRetirada.Location = new Point(260, 236);
             dtpRetirada.Name = "dtpRetirada";
             dtpRetirada.Size = new Size(148, 27);
             dtpRetirada.TabIndex = 2;
@@ -341,7 +368,7 @@
             // label10
             // 
             label10.AutoSize = true;
-            label10.Location = new Point(106, 266);
+            label10.Location = new Point(714, 170);
             label10.Name = "label10";
             label10.Size = new Size(70, 20);
             label10.TabIndex = 1;
@@ -350,35 +377,35 @@
             // label9
             // 
             label9.AutoSize = true;
-            label9.Location = new Point(106, 201);
+            label9.Location = new Point(159, 243);
             label9.Name = "label9";
-            label9.Size = new Size(95, 20);
+            label9.Size = new Size(79, 20);
             label9.TabIndex = 1;
-            label9.Text = "data retirada";
+            label9.Text = "data inicio";
             // 
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new Point(106, 133);
+            label8.Location = new Point(159, 175);
             label8.Name = "label8";
-            label8.Size = new Size(51, 20);
+            label8.Size = new Size(45, 20);
             label8.TabIndex = 1;
-            label8.Text = "setups";
+            label8.Text = "setup";
             // 
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(106, 68);
+            label7.Location = new Point(159, 110);
             label7.Name = "label7";
-            label7.Size = new Size(59, 20);
+            label7.Size = new Size(53, 20);
             label7.TabIndex = 1;
-            label7.Text = "clientes";
+            label7.Text = "cliente";
             // 
             // cmbItens
             // 
             cmbItens.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbItens.FormattingEnabled = true;
-            cmbItens.Location = new Point(204, 125);
+            cmbItens.Location = new Point(257, 167);
             cmbItens.Name = "cmbItens";
             cmbItens.Size = new Size(151, 28);
             cmbItens.TabIndex = 0;
@@ -387,35 +414,10 @@
             // 
             cmbClientes.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbClientes.FormattingEnabled = true;
-            cmbClientes.Location = new Point(204, 65);
+            cmbClientes.Location = new Point(257, 107);
             cmbClientes.Name = "cmbClientes";
             cmbClientes.Size = new Size(151, 28);
             cmbClientes.TabIndex = 0;
-            // 
-            // lstPecasAtuais
-            // 
-            lstPecasAtuais.FormattingEnabled = true;
-            lstPecasAtuais.Location = new Point(285, 71);
-            lstPecasAtuais.Name = "lstPecasAtuais";
-            lstPecasAtuais.Size = new Size(150, 104);
-            lstPecasAtuais.TabIndex = 2;
-            // 
-            // txtNovaPeca
-            // 
-            txtNovaPeca.FormattingEnabled = true;
-            txtNovaPeca.Location = new Point(285, 233);
-            txtNovaPeca.Name = "txtNovaPeca";
-            txtNovaPeca.Size = new Size(150, 104);
-            txtNovaPeca.TabIndex = 2;
-            // 
-            // btnAplicarUpgrade
-            // 
-            btnAplicarUpgrade.Location = new Point(302, 398);
-            btnAplicarUpgrade.Name = "btnAplicarUpgrade";
-            btnAplicarUpgrade.Size = new Size(94, 29);
-            btnAplicarUpgrade.TabIndex = 3;
-            btnAplicarUpgrade.Text = "button1";
-            btnAplicarUpgrade.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -448,7 +450,7 @@
         private Label label2;
         private Label label1;
         private Button btnCadastrarCliente;
-        private ListBox clientes_cadastrados;
+        private ListBox lstClientes;
         private Label label4;
         private Label label3;
         private TextBox txtValorDiario;
@@ -466,7 +468,7 @@
         private ListBox lstLocacoes;
         private Button btnDevolver;
         private Button btnRegistrarLocacao;
-        private DateTimePicker dateTimePicker1;
+        private DateTimePicker dtpDevolucao;
         private DateTimePicker dtpRetirada;
         private Label label10;
         private Label label9;
