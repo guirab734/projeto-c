@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WinControlelLocacao
+namespace projeto
 {
     public class Cliente
     {

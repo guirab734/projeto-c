@@ -1,30 +1,215 @@
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
 namespace projeto
 {
     public partial class Form1 : Form
     {
+        // Bancos de dados temporários na memória (Usando o namespace correto do seu projeto)
+        private List<Cliente> listaClientes = new List<Cliente>();
+        private List<Item> listaItens = new List<Item>();
+        private List<Locacao> listaLocacoes = new List<Locacao>();
+
         public Form1()
         {
             InitializeComponent();
+
+            // Configura como os objetos serão exibidos nos ComboBoxes e ListBoxes
+            cmbClientes.DisplayMember = "Nome";
+            cmbItens.DisplayMember = "Nome";
+            cmbSetupsUpgrade.DisplayMember = "Nome";
+
+            //lstClientes.DisplayMember = "Nome";
+            lstItens.DisplayMember = "Nome";
         }
 
-        private void groupBox1_Enter(object sender, EventArgs e)
+        // ==========================================
+        // 👥 ABA 1: CLIENTES
+        // ==========================================
+        private void btnCadastrarCliente_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtNomeCliente.Text))
+            {
+                MessageBox.Show("Por favor, insira o nome do cliente.");
+                return;
+            }
 
+            Cliente novoCliente = new Cliente(txtNomeCliente.Text, txtContatoCliente.Text);
+            listaClientes.Add(novoCliente);
+
+            AtualizarListasClientes();
+
+            txtNomeCliente.Clear();
+            txtContatoCliente.Clear();
+            MessageBox.Show("Cliente cadastrado com sucesso!");
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void AtualizarListasClientes()
         {
+            // Atualiza o ListBox da aba 1 e o ComboBox da aba 3
+            //lstClientes.DataSource = null;
+            //lstClientes.DataSource = listaClientes;
 
+            cmbClientes.DataSource = null;
+            cmbClientes.DataSource = listaClientes;
         }
 
-        private void txtContatoCliente_TextChanged(object sender, EventArgs e)
+        // ==========================================
+        // 📦 ABA 2: SETUPS (HARDWARE)
+        // ==========================================
+        private void btnCadastrarItem_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtNomeItem.Text) || !decimal.TryParse(txtValorDiario.Text, out decimal valorDiario))
+            {
+                MessageBox.Show("Insira um nome válido e um valor de diária numérico.");
+                return;
+            }
 
+            Item novoItem = new Item(txtNomeItem.Text, valorDiario);
+
+            // Pega as peças digitadas separadas por vírgula e adiciona na lista do objeto
+            if (!string.IsNullOrWhiteSpace(txtComponentesIniciais.Text))
+            {
+                string[] pecas = txtComponentesIniciais.Text.Split(',');
+                foreach (var peca in pecas)
+                {
+                    novoItem.Componentes.Add(peca.Trim());
+                }
+            }
+
+            listaItens.Add(novoItem);
+            AtualizarListasItens();
+
+            txtNomeItem.Clear();
+            txtValorDiario.Clear();
+            txtComponentesIniciais.Clear();
+            MessageBox.Show("Setup de hardware cadastrado com sucesso!");
         }
 
-        private void label3_Click(object sender, EventArgs e)
+        private void AtualizarListasItens()
         {
+            // Atualiza o ListBox da aba 2
+            lstItens.DataSource = null;
+            lstItens.DataSource = listaItens;
 
+            // Atualiza o ComboBox de seleção da aba 3
+            cmbItens.DataSource = null;
+            cmbItens.DataSource = listaItens;
+
+            // Atualiza o ComboBox de seleção da aba 4 (Upgrades)
+            cmbSetupsUpgrade.DataSource = null;
+            cmbSetupsUpgrade.DataSource = listaItens;
+        }
+
+        // ==========================================
+        // 📝 ABA 3: LOCAÇÕES E DEVOLUÇÕES
+        // ==========================================
+        private void btnRegistrarLocacao_Click(object sender, EventArgs e)
+        {
+            //Cliente clienteSel = (Cliente)cmbClientes.SelectedItem;
+            //Item itemSel = (Item)cmbItens.SelectedItem;
+
+            //if (clienteSel == null || itemSel == null)
+            {
+                MessageBox.Show("Selecione um cliente e um setup válidos.");
+                return;
+            }
+
+            // Cria a locação passando as datas dos DateTimePickers
+            //Locacao novaLocacao = new Locacao(clienteSel, itemSel, dtpRetirada.Value, dtpDevolucao.Value);
+            //listaLocacoes.Add(novaLocacao);
+
+            //AtualizarListagemLocacoes();
+            //MessageBox.Show($"Locação salva com sucesso!\nValor Total: R$ {novaLocacao.ValorTotal:N2}");
+        }
+
+        private void btnDevolver_Click(object sender, EventArgs e)
+        {
+            int index = lstLocacoes.SelectedIndex;
+            if (index < 0)
+            {
+                MessageBox.Show("Selecione uma locação ativa na lista para realizar a devolução.");
+                return;
+            }
+
+            // Filtra apenas as locações que ainda estão ativas na memória
+            List<Locacao> ativas = listaLocacoes.FindAll(l => l.Ativa);
+            if (index < ativas.Count)
+            {
+                // Altera o estado interno usando encapsulamento (regrade negócio do professor)
+                ativas[index].RegistrarDevolucao();
+                AtualizarListagemLocacoes();
+                MessageBox.Show("Devolução concluída! O equipamento retornou ao estoque.");
+            }
+        }
+
+        private void AtualizarListagemLocacoes()
+        {
+            lstLocacoes.Items.Clear();
+            foreach (var locacao in listaLocacoes)
+            {
+                // Só exibe na lista o que ainda estiver alugado (Ativa == true)
+                if (locacao.Ativa)
+                {
+                    lstLocacoes.Items.Add($"{locacao.Cliente.Nome} -> {locacao.Item.Nome} (Total: R$ {locacao.ValorTotal:N2})");
+                }
+            }
+        }
+
+        // ==========================================
+        // 🚀 ABA 4: UPGRADES
+        // ==========================================
+
+        // Dispara toda vez que você muda o PC selecionado no ComboBox de Upgrade
+        private void cmbSetupsUpgrade_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //Item setupSel = (Item)cmbSetupsUpgrade.SelectedItem;
+            //if (setupSel != null)
+            {
+                //lstPecasAtuais.Items.Clear();
+                //foreach (var peca in setupSel.Componentes)
+                //{
+                //    lstPecasAtuais.Items.Add(peca);
+                //}
+            }
+        }
+
+        private void btnAplicarUpgrade_Click(object sender, EventArgs e)
+        {
+            //Item setupSel = (Item)cmbSetupsUpgrade.SelectedItem;
+
+            //if (setupSel == null)
+            //{
+            //    MessageBox.Show("Selecione um setup para aplicar o upgrade.");
+            //    return;
+            //}
+
+            if (string.IsNullOrWhiteSpace(txtNovaPeca.Text))
+            {
+                MessageBox.Show("Digite o nome da peça que deseja adicionar.");
+                return;
+            }
+
+            // 🔍 VALIDAÇÃO DO INCREMENTO: Verifica se o item possui alguma locação ativa
+            //bool estaAlugado = listaLocacoes.Exists(l => l.Item == setupSel && l.Ativa);
+
+            //if (estaAlugado)
+            //{
+            //    MessageBox.Show("❌ Bloqueado! Este computador está atualmente alugado por um cliente.\n" +
+            //                    "O upgrade só é permitido quando o equipamento retornar para o estoque.",
+            //                    "Validação de Segurança", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
+
+            // Se o hardware estiver livre, adiciona a peça na lista interna do objeto
+            //setupSel.Componentes.Add(txtNovaPeca.Text.Trim());
+
+            // Atualiza a lista na tela para mostrar a peça nova imediatamente
+            cmbSetupsUpgrade_SelectedIndexChanged(this, EventArgs.Empty);
+
+            //txtNovaPeca.Clear();
+            //MessageBox.Show($"⚡ Upgrade concluído! Nova peça instalada com sucesso no {setupSel.Nome}.");
         }
     }
 }
