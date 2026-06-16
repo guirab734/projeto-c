@@ -17,5 +17,9 @@ namespace projeto.Models
             ValorDiario = valorDiario;
             Componentes = new List<string>();
         }
+        public override string ToString()
+        {
+            return this.Nome; // Faz o ComboBox de Setups mostrar o nome do PC
+        }
     }
 }

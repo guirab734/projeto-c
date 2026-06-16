@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using projeto.Models;
+using projeto.Repositories;
 
 namespace projeto
 {
     public partial class Form1 : Form
     {
         // Bancos de dados temporários na memória
-        private List<Cliente> listaClientes = new List<Cliente>();
         private List<Item> listaItens = new List<Item>();
         private List<Locacao> listaLocacoes = new List<Locacao>();
 
@@ -16,16 +16,46 @@ namespace projeto
         {
             InitializeComponent();
 
-            // Configura como os objetos serão exibidos nas caixas de seleção
+            // Ativa o banco de dados
+            projeto.Data.DatabaseConnection.InicializarBanco();
+
+            // Configura os textos exibidos
             cmbClientes.DisplayMember = "Nome";
             cmbItens.DisplayMember = "Nome";
             cmbSetupsUpgrade.DisplayMember = "Nome";
 
             lstClientes.DisplayMember = "Nome";
             lstItens.DisplayMember = "Nome";
+
+            // Carrega os clientes salvos do banco
+            AtualizarListasClientes();
+
+            // Dá o start nas listas de setups e locações (mesmo que vazias no início)
+            AtualizarListasItens();
+            AtualizarListagemLocacoes();
         }
 
-        // CLIENTES
+        private void AtualizarListasClientes()
+        {
+            try
+            {
+                ClienteRepository repo = new ClienteRepository();
+                List<Cliente> listaDoBanco = repo.ObterTodos();
+
+                // Atualiza o ListBox e o ComboBox da tela
+                lstClientes.DataSource = null;
+                lstClientes.DataSource = listaDoBanco;
+
+                cmbClientes.DataSource = null;
+                cmbClientes.DataSource = listaDoBanco;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar dados do banco: " + ex.Message);
+            }
+        }
+
+        // CLIENTES - Cadastrar
         private void btnCadastrarCliente_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNomeCliente.Text))
@@ -34,25 +64,27 @@ namespace projeto
                 return;
             }
 
-            projeto.Models.Cliente novoCliente = new projeto.Models.Cliente(txtNomeCliente.Text, txtContatoCliente.Text);
+            try
+            {
+                Cliente novoCliente = new Cliente(txtNomeCliente.Text, txtContatoCliente.Text);
+                ClienteRepository repo = new ClienteRepository();
+                repo.Salvar(novoCliente);
 
-            listaClientes.Add(novoCliente);
-            AtualizarListasClientes();
+                MessageBox.Show("Cliente salvo no banco de dados!");
 
-            txtNomeCliente.Clear();
-            txtContatoCliente.Clear();
-            MessageBox.Show("Cliente cadastrado com sucesso!");
+                txtNomeCliente.Clear();
+                txtContatoCliente.Clear();
+                AtualizarListasClientes();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao salvar: " + ex.Message);
+            }
+
+
         }
-        private void AtualizarListasClientes()
-        {
-            lstClientes.DataSource = null;
-            lstClientes.DataSource = listaClientes;
 
-            cmbClientes.DataSource = null;
-            cmbClientes.DataSource = listaClientes;
-        }
-
-        // SETUP
+        // SETUP - Cadastrar
         private void btnCadastrarItem_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNomeItem.Text) || !decimal.TryParse(txtValorDiario.Text, out decimal valorDiario))
@@ -63,7 +95,6 @@ namespace projeto
 
             Item novoItem = new Item(txtNomeItem.Text, valorDiario);
 
-            // Pega as peças digitadas separadas por vírgula
             if (!string.IsNullOrWhiteSpace(txtComponentesIniciais.Text))
             {
                 string[] pecas = txtComponentesIniciais.Text.Split(',');
@@ -72,6 +103,7 @@ namespace projeto
                     novoItem.Componentes.Add(peca.Trim());
                 }
             }
+
 
             listaItens.Add(novoItem);
             AtualizarListasItens();
@@ -84,21 +116,39 @@ namespace projeto
 
         private void AtualizarListasItens()
         {
+            // Criamos uma lista de exibição que garante que o nome seja pego corretamente
+            // Isso evita que o Windows Forms se perca tentando ler o objeto complexo
+
+            // Para o ListBox
             lstItens.DataSource = null;
-            lstItens.DataSource = listaItens;
+            lstItens.Items.Clear();
+            foreach (var item in listaItens)
+            {
+                lstItens.Items.Add(item.Nome); // Adicionamos apenas o nome como texto
+            }
 
+            // Para o ComboBox de Itens
             cmbItens.DataSource = null;
-            cmbItens.DataSource = listaItens;
+            cmbItens.Items.Clear();
+            foreach (var item in listaItens)
+            {
+                cmbItens.Items.Add(item.Nome);
+            }
 
+            // Para o ComboBox de Upgrades
             cmbSetupsUpgrade.DataSource = null;
-            cmbSetupsUpgrade.DataSource = listaItens;
+            cmbSetupsUpgrade.Items.Clear();
+            foreach (var item in listaItens)
+            {
+                cmbSetupsUpgrade.Items.Add(item.Nome);
+            }
         }
 
-        // locação
+        // LOCAÇÃO - Registrar
         private void btnRegistrarLocacao_Click(object sender, EventArgs e)
         {
-            Cliente clienteSel = (Cliente)cmbClientes.SelectedItem;
-            Item itemSel = (Item)cmbItens.SelectedItem;
+            projeto.Models.Cliente clienteSel = (projeto.Models.Cliente)cmbClientes.SelectedItem;
+            projeto.Models.Item itemSel = (projeto.Models.Item)cmbItens.SelectedItem;
 
             if (clienteSel == null || itemSel == null)
             {
@@ -106,7 +156,6 @@ namespace projeto
                 return;
             }
 
-            // Cria a locação passando as datas
             Locacao novaLocacao = new Locacao(clienteSel, itemSel, dtpRetirada.Value, dtpDevolucao.Value);
             listaLocacoes.Add(novaLocacao);
 
@@ -114,6 +163,7 @@ namespace projeto
             MessageBox.Show($"Locação salva com sucesso!\nValor Total: R$ {novaLocacao.ValorTotal:N2}");
         }
 
+        // LOCAÇÃO - Devolver
         private void btnDevolver_Click(object sender, EventArgs e)
         {
             int index = lstLocacoes.SelectedIndex;
@@ -123,11 +173,9 @@ namespace projeto
                 return;
             }
 
-            // Filtra apenas as locações que ainda estão ativas na memória
             List<Locacao> ativas = listaLocacoes.FindAll(l => l.Ativa);
             if (index < ativas.Count)
             {
-                // Altera o estado interno usando encapsulamento
                 ativas[index].RegistrarDevolucao();
                 AtualizarListagemLocacoes();
                 MessageBox.Show("Devolução concluída! O equipamento retornou ao estoque.");
@@ -136,33 +184,29 @@ namespace projeto
 
         private void AtualizarListagemLocacoes()
         {
-            lstLocacoes.Items.Clear();
-            foreach (var locacao in listaLocacoes)
-            {
-                // Só exibe na lista o que ainda estiver alugado (Ativa == true)
-                if (locacao.Ativa)
-                {
-                    lstLocacoes.Items.Add($"{locacao.Cliente.Nome} -> {locacao.Item.Nome} (Total: R$ {locacao.ValorTotal:N2})");
-                }
-            }
+            // Filtra apenas as locações que ainda estão ativas
+            List<Locacao> ativas = listaLocacoes.FindAll(l => l.Ativa);
+
+            lstLocacoes.DataSource = null;
+            lstLocacoes.DataSource = ativas; // O ToString que colocamos na classe Locacao vai cuidar do texto!
         }
 
-        // UPGRADE 
-
+        // UPGRADE - Mudança de PC
         private void cmbSetupsUpgrade_SelectedIndexChanged(object sender, EventArgs e)
         {
             Item setupSel = (Item)cmbSetupsUpgrade.SelectedItem;
             if (setupSel != null)
             {
                 lstPecasAtuais.Items.Clear();
-            }
-            foreach (var peca in setupSel.Componentes)
-            {
-                lstPecasAtuais.Items.Add(peca);
+                foreach (var peca in setupSel.Componentes)
+                {
+                    lstPecasAtuais.Items.Add(peca);
+                }
             }
         }
 
-        private void btnAplicarUpgrade_Click(object sender, EventArgs e)
+        // UPGRADE - Aplicar Peça Nova (Conectado com o Designer _1)
+        private void btnAplicarUpgrade_Click_1(object sender, EventArgs e)
         {
             Item setupSel = (Item)cmbSetupsUpgrade.SelectedItem;
             if (setupSel == null)
@@ -171,35 +215,20 @@ namespace projeto
                 return;
             }
 
-            // SLECIONAR SE HOUVER PARA UPGREDAR
-
-            string pecaTexto = txtNovaPeca.SelectedItem?.ToString() ?? "";
-
-            if (string.IsNullOrWhiteSpace(pecaTexto))
-            {
-                // Caso queira digitar na hora se a lista estiver vazia:
-                pecaTexto = Microsoft.VisualBasic.Interaction.InputBox("Digite o nome da nova peça para o Upgrade:", "Novo Componente", "");
-            }
+            string pecaTexto = Microsoft.VisualBasic.Interaction.InputBox("Digite o nome da nova peça para o Upgrade:", "Novo Componente", "");
 
             if (string.IsNullOrWhiteSpace(pecaTexto)) return;
-
-            //Verifica se o item possui alguma locação ativa
 
             bool estaAlugado = listaLocacoes.Exists(l => l.Item == setupSel && l.Ativa);
             if (estaAlugado)
             {
-                MessageBox.Show("❌ Bloqueado! Este computador está atualmente alugado por um cliente.\n" +
-                                "O upgrade só é permitido quando o equipamento retornar para o estoque.",
-                                "Validação de Segurança", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("❌ Bloqueado! Este computador está atualmente alugado por um cliente.", "Aviso");
                 return;
             }
 
-            // Se o hardware estiver livre, adiciona a peça na lista interna do objeto
             setupSel.Componentes.Add(pecaTexto.Trim());
-
-            // Atualiza a lista na tela para mostrar a peça nova imediatamente
             cmbSetupsUpgrade_SelectedIndexChanged(this, EventArgs.Empty);
-            MessageBox.Show($"⚡ Upgrade concluído! Nova peça instalada com sucesso no {setupSel.Nome}.");
+            MessageBox.Show("⚡ Upgrade concluído com sucesso!");
         }
     }
 }

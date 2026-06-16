@@ -35,5 +35,12 @@ namespace projeto.Models
         {
             Ativa = false;
         }
+
+        public override string ToString()
+        {
+            
+            return $"{this.Cliente.Nome} -> {this.Item.Nome}";
+        }
+
     }
 }
