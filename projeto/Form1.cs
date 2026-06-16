@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using projeto.Models;
 
 namespace projeto
 {
@@ -33,7 +34,8 @@ namespace projeto
                 return;
             }
 
-            Cliente novoCliente = new Cliente(txtNomeCliente.Text, txtContatoCliente.Text);
+            projeto.Models.Cliente novoCliente = new projeto.Models.Cliente(txtNomeCliente.Text, txtContatoCliente.Text);
+
             listaClientes.Add(novoCliente);
             AtualizarListasClientes();
 
@@ -41,7 +43,6 @@ namespace projeto
             txtContatoCliente.Clear();
             MessageBox.Show("Cliente cadastrado com sucesso!");
         }
-
         private void AtualizarListasClientes()
         {
             lstClientes.DataSource = null;

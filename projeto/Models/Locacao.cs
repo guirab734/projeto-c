@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace projeto
+
+namespace projeto.Models
 {
     public class Locacao
     {
