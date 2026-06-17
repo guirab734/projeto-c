@@ -8,9 +8,9 @@ using System.Windows.Forms;
 
 namespace projeto
 {
-    public partial class Form2 : Form
+    public partial class FormLogin : Form
     {
-        public Form2()
+        public FormLogin()
         {
             InitializeComponent();
         }
