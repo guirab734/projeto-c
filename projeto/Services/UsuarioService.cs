@@ -8,11 +8,13 @@ namespace projeto.Services
     {
         private readonly UsuarioRepository _repository = new UsuarioRepository();
 
-        // Só Admin pode cadastrar novos usuários e definir seus papéis
         public void Salvar(Usuario usuario, string senhaTextoPuro)
         {
             if (!SessaoUsuario.EhAdmin)
                 throw new AcessoNegadoException("Apenas o Admin pode cadastrar usuários.");
+
+            if (_repository.LoginJaExiste(usuario.Login))
+                throw new AcessoNegadoException($"Já existe um usuário com o login '{usuario.Login}'.");
 
             _repository.Salvar(usuario, senhaTextoPuro);
         }
@@ -25,13 +27,16 @@ namespace projeto.Services
             return _repository.ObterTodos();
         }
 
-        // Usado SOMENTE na tela de login, antes de existir qualquer sessão.
-        // Por isso não passa pela checagem de SessaoUsuario.
+        public List<Papel> ObterPapeis()
+        {
+            return _repository.ObterPapeis();
+        }
+
         public Usuario Autenticar(string login, string senha)
         {
             var usuario = _repository.BuscarPorLogin(login);
             if (usuario == null)
-                return null; // login não encontrado
+                return null;
 
             bool senhaCorreta = _repository.ValidarSenha(senha, usuario.SenhaHash);
             return senhaCorreta ? usuario : null;

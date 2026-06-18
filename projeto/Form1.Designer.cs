@@ -56,6 +56,7 @@
             label5 = new Label();
             cmbSetupsUpgrade = new ComboBox();
             tabPage4 = new TabPage();
+            btnExcluirLocacao = new Button();
             lstLocacoes = new ListBox();
             btnDevolver = new Button();
             btnRegistrarLocacao = new Button();
@@ -67,12 +68,24 @@
             label7 = new Label();
             cmbItens = new ComboBox();
             cmbClientes = new ComboBox();
-            btnExcluirLocacao = new Button();
+            tabUsuarios = new TabPage();
+            lstUsuarios = new ListBox();
+            btnCadastrarUsuario = new Button();
+            cmbPapelUsuario = new ComboBox();
+            lblPapelUsuario = new Label();
+            txtSenhaUsuario = new TextBox();
+            txtLoginUsuario = new TextBox();
+            lblSenhaUsuario = new Label();
+            lblLoginUsuario = new Label();
+            txtNomeUsuario = new TextBox();
+            txtNomeDoUsuario = new Label();
+            lblNomeUsuario = new Label();
             clientes.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
             tabPage3.SuspendLayout();
             tabPage4.SuspendLayout();
+            tabUsuarios.SuspendLayout();
             SuspendLayout();
             // 
             // clientes
@@ -81,6 +94,7 @@
             clientes.Controls.Add(tabPage2);
             clientes.Controls.Add(tabPage3);
             clientes.Controls.Add(tabPage4);
+            clientes.Controls.Add(tabUsuarios);
             clientes.ImeMode = ImeMode.On;
             clientes.Location = new Point(2, 9);
             clientes.Margin = new Padding(3, 2, 3, 2);
@@ -389,6 +403,16 @@
             tabPage4.Text = "locações e devoluções";
             tabPage4.UseVisualStyleBackColor = true;
             // 
+            // btnExcluirLocacao
+            // 
+            btnExcluirLocacao.Location = new Point(621, 251);
+            btnExcluirLocacao.Name = "btnExcluirLocacao";
+            btnExcluirLocacao.Size = new Size(232, 23);
+            btnExcluirLocacao.TabIndex = 5;
+            btnExcluirLocacao.Text = "Excluir Locação";
+            btnExcluirLocacao.UseVisualStyleBackColor = true;
+            btnExcluirLocacao.Click += btnExcluirLocacao_Click;
+            // 
             // lstLocacoes
             // 
             lstLocacoes.FormattingEnabled = true;
@@ -494,15 +518,124 @@
             cmbClientes.Size = new Size(133, 23);
             cmbClientes.TabIndex = 0;
             // 
-            // btnExcluirLocacao
+            // tabUsuarios
             // 
-            btnExcluirLocacao.Location = new Point(621, 251);
-            btnExcluirLocacao.Name = "btnExcluirLocacao";
-            btnExcluirLocacao.Size = new Size(232, 23);
-            btnExcluirLocacao.TabIndex = 5;
-            btnExcluirLocacao.Text = "Excluir Locação";
-            btnExcluirLocacao.UseVisualStyleBackColor = true;
-            btnExcluirLocacao.Click += btnExcluirLocacao_Click;
+            tabUsuarios.Controls.Add(lstUsuarios);
+            tabUsuarios.Controls.Add(btnCadastrarUsuario);
+            tabUsuarios.Controls.Add(cmbPapelUsuario);
+            tabUsuarios.Controls.Add(lblPapelUsuario);
+            tabUsuarios.Controls.Add(txtSenhaUsuario);
+            tabUsuarios.Controls.Add(txtLoginUsuario);
+            tabUsuarios.Controls.Add(lblSenhaUsuario);
+            tabUsuarios.Controls.Add(lblLoginUsuario);
+            tabUsuarios.Controls.Add(txtNomeUsuario);
+            tabUsuarios.Controls.Add(txtNomeDoUsuario);
+            tabUsuarios.Controls.Add(lblNomeUsuario);
+            tabUsuarios.Location = new Point(4, 24);
+            tabUsuarios.Name = "tabUsuarios";
+            tabUsuarios.Padding = new Padding(3);
+            tabUsuarios.Size = new Size(907, 412);
+            tabUsuarios.TabIndex = 4;
+            tabUsuarios.Text = "usuários";
+            tabUsuarios.UseVisualStyleBackColor = true;
+            tabUsuarios.Click += tabUsuarios_Click;
+            // 
+            // lstUsuarios
+            // 
+            lstUsuarios.FormattingEnabled = true;
+            lstUsuarios.Location = new Point(397, 43);
+            lstUsuarios.Name = "lstUsuarios";
+            lstUsuarios.Size = new Size(120, 214);
+            lstUsuarios.TabIndex = 8;
+            // 
+            // btnCadastrarUsuario
+            // 
+            btnCadastrarUsuario.Location = new Point(235, 234);
+            btnCadastrarUsuario.Name = "btnCadastrarUsuario";
+            btnCadastrarUsuario.Size = new Size(100, 23);
+            btnCadastrarUsuario.TabIndex = 7;
+            btnCadastrarUsuario.Text = "Cadastrar Usuário";
+            btnCadastrarUsuario.UseVisualStyleBackColor = true;
+            btnCadastrarUsuario.Click += btnCadastrarUsuario_Click;
+            // 
+            // cmbPapelUsuario
+            // 
+            cmbPapelUsuario.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbPapelUsuario.FormattingEnabled = true;
+            cmbPapelUsuario.Location = new Point(235, 189);
+            cmbPapelUsuario.Name = "cmbPapelUsuario";
+            cmbPapelUsuario.Size = new Size(100, 23);
+            cmbPapelUsuario.TabIndex = 6;
+            // 
+            // lblPapelUsuario
+            // 
+            lblPapelUsuario.AutoSize = true;
+            lblPapelUsuario.Location = new Point(178, 192);
+            lblPapelUsuario.Name = "lblPapelUsuario";
+            lblPapelUsuario.Size = new Size(36, 15);
+            lblPapelUsuario.TabIndex = 5;
+            lblPapelUsuario.Text = "Papel";
+            // 
+            // txtSenhaUsuario
+            // 
+            txtSenhaUsuario.Location = new Point(235, 146);
+            txtSenhaUsuario.Name = "txtSenhaUsuario";
+            txtSenhaUsuario.PasswordChar = '●';
+            txtSenhaUsuario.Size = new Size(100, 23);
+            txtSenhaUsuario.TabIndex = 4;
+            // 
+            // txtLoginUsuario
+            // 
+            txtLoginUsuario.Location = new Point(235, 98);
+            txtLoginUsuario.Name = "txtLoginUsuario";
+            txtLoginUsuario.Size = new Size(100, 23);
+            txtLoginUsuario.TabIndex = 3;
+            // 
+            // lblSenhaUsuario
+            // 
+            lblSenhaUsuario.AutoSize = true;
+            lblSenhaUsuario.Location = new Point(176, 146);
+            lblSenhaUsuario.Name = "lblSenhaUsuario";
+            lblSenhaUsuario.Size = new Size(38, 15);
+            lblSenhaUsuario.TabIndex = 2;
+            lblSenhaUsuario.Text = "senha";
+            lblSenhaUsuario.Click += lblLoginUsuario_Click;
+            // 
+            // lblLoginUsuario
+            // 
+            lblLoginUsuario.AutoSize = true;
+            lblLoginUsuario.Location = new Point(176, 101);
+            lblLoginUsuario.Name = "lblLoginUsuario";
+            lblLoginUsuario.Size = new Size(37, 15);
+            lblLoginUsuario.TabIndex = 2;
+            lblLoginUsuario.Text = "Login";
+            lblLoginUsuario.Click += lblLoginUsuario_Click;
+            // 
+            // txtNomeUsuario
+            // 
+            txtNomeUsuario.Location = new Point(235, 54);
+            txtNomeUsuario.Name = "txtNomeUsuario";
+            txtNomeUsuario.Size = new Size(100, 23);
+            txtNomeUsuario.TabIndex = 1;
+            // 
+            // txtNomeDoUsuario
+            // 
+            txtNomeDoUsuario.AutoSize = true;
+            txtNomeDoUsuario.Location = new Point(391, 54);
+            txtNomeDoUsuario.Name = "txtNomeDoUsuario";
+            txtNomeDoUsuario.Size = new Size(0, 15);
+            txtNomeDoUsuario.TabIndex = 0;
+            txtNomeDoUsuario.Click += lblNomeUsuario_Click;
+            // 
+            // lblNomeUsuario
+            // 
+            lblNomeUsuario.AutoSize = true;
+            lblNomeUsuario.Location = new Point(186, 54);
+            lblNomeUsuario.Name = "lblNomeUsuario";
+            lblNomeUsuario.Size = new Size(27, 15);
+            lblNomeUsuario.TabIndex = 0;
+            lblNomeUsuario.Text = "text";
+            lblNomeUsuario.Click += lblNomeUsuario_Click;
             // 
             // Form1
             // 
@@ -513,7 +646,6 @@
             Margin = new Padding(3, 2, 3, 2);
             Name = "Form1";
             Text = "Form1";
-            //Load += Form1_Load;
             clientes.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
@@ -523,6 +655,8 @@
             tabPage3.PerformLayout();
             tabPage4.ResumeLayout(false);
             tabPage4.PerformLayout();
+            tabUsuarios.ResumeLayout(false);
+            tabUsuarios.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -569,5 +703,17 @@
         private Button btnEditarItem;
         private Button btnRemoverPeca;
         private Button btnExcluirLocacao;
+        private TabPage tabUsuarios;
+        private TextBox txtNomeUsuario;
+        private Label lblNomeUsuario;
+        private Label txtNomeDoUsuario;
+        private TextBox txtSenhaUsuario;
+        private TextBox txtLoginUsuario;
+        private Label lblLoginUsuario;
+        private Label lblSenhaUsuario;
+        private ComboBox cmbPapelUsuario;
+        private Label lblPapelUsuario;
+        private ListBox lstUsuarios;
+        private Button btnCadastrarUsuario;
     }
 }

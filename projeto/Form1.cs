@@ -13,7 +13,7 @@ namespace projeto
         private readonly ClienteService _clienteService = new ClienteService();
         private readonly ItemService _itemService = new ItemService();
         private readonly LocacaoService _locacaoService = new LocacaoService();
-
+        private readonly UsuarioService _usuarioService = new UsuarioService();
         // Guarda o cliente/item atualmente selecionado na lista, para os
         // botões de Editar/Excluir saberem sobre qual registro agir.
         private Cliente _clienteSelecionado = null;
@@ -33,6 +33,12 @@ namespace projeto
             AtualizarListasClientes();
             AtualizarListasItens();
             AtualizarListagemLocacoes();
+
+            // NOVO: configura e carrega a aba de usuários
+            cmbPapelUsuario.DisplayMember = "Nome";
+            lstUsuarios.DisplayMember = "Nome";
+            CarregarPapeis();
+            AtualizarListaUsuarios();
 
             // Conecta os eventos de seleção nas listas (preenche os campos
             // automaticamente quando o usuário clica num item da lista)
@@ -531,6 +537,102 @@ namespace projeto
             {
                 MessageBox.Show("Erro ao remover peça: " + ex.Message);
             }
+        }
+
+        // ===================== USUÁRIOS DO SISTEMA (só Admin) =====================
+        private void CarregarPapeis()
+        {
+            try
+            {
+                var papeis = _usuarioService.ObterPapeis();
+                cmbPapelUsuario.DataSource = papeis;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar papéis: " + ex.Message);
+            }
+        }
+
+        private void AtualizarListaUsuarios()
+        {
+            try
+            {
+                if (!SessaoUsuario.EhAdmin) return; // só Admin pode ver a lista
+
+                var usuarios = _usuarioService.ObterTodos();
+                lstUsuarios.DataSource = null;
+                lstUsuarios.DataSource = usuarios;
+            }
+            catch (AcessoNegadoException)
+            {
+                // Não-admin: simplesmente não popula a lista, sem mensagem de erro
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar usuários: " + ex.Message);
+            }
+        }
+
+        private void btnCadastrarUsuario_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtNomeDoUsuario.Text) ||
+                string.IsNullOrWhiteSpace(txtLoginUsuario.Text) ||
+                string.IsNullOrWhiteSpace(txtSenhaUsuario.Text))
+            {
+                MessageBox.Show("Preencha nome, login e senha.");
+                return;
+            }
+
+            Papel papelSel = (Papel)cmbPapelUsuario.SelectedItem;
+            if (papelSel == null)
+            {
+                MessageBox.Show("Selecione um papel para o novo usuário.");
+                return;
+            }
+
+            try
+            {
+                var novoUsuario = new Usuario
+                {
+                    Nome = txtNomeDoUsuario.Text,
+                    Login = txtLoginUsuario.Text,
+                    PapelId = papelSel.Id
+                };
+
+                // A senha em texto puro só existe até esta linha — o Service/Repository
+                // transforma em hash BCrypt antes de qualquer gravação no banco.
+                _usuarioService.Salvar(novoUsuario, txtSenhaUsuario.Text);
+
+                MessageBox.Show("Usuário cadastrado com sucesso!");
+
+                txtNomeDoUsuario.Clear();
+                txtLoginUsuario.Clear();
+                txtSenhaUsuario.Clear();
+                AtualizarListaUsuarios();
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao cadastrar usuário: " + ex.Message);
+            }
+        }
+
+        private void lblNomeUsuario_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblLoginUsuario_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabUsuarios_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

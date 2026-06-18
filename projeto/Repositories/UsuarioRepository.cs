@@ -1,9 +1,13 @@
-﻿using System;
+﻿using projeto.Data;
+using projeto.Models;
+using System.Data.SQLite;
+
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using projeto.Models;
 using projeto.Data;
-
+ 
 namespace projeto.Repositories
 {
     public class UsuarioRepository
@@ -104,6 +108,49 @@ namespace projeto.Repositories
         public bool ValidarSenha(string senhaDigitada, string hashGuardado)
         {
             return BCrypt.Net.BCrypt.Verify(senhaDigitada, hashGuardado);
+        }
+
+        // Busca os 3 papéis fixos do sistema, para popular o ComboBox
+        // na tela de cadastro de usuário (Visualizador, Operador, Admin)
+        public List<Papel> ObterPapeis()
+        {
+            var lista = new List<Papel>();
+            using (var conn = DatabaseConnection.GetConnection())
+            {
+                conn.Open();
+                string sql = "SELECT id, nome FROM papeis";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lista.Add(new Papel
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Nome = reader["nome"].ToString()
+                        });
+                    }
+                }
+            }
+            return lista;
+        }
+
+        // Verifica se já existe algum usuário com esse login (evita
+        // duplicidade — login é UNIQUE no banco, mas é melhor avisar
+        // com mensagem clara do que deixar o SQLite estourar exception)
+        public bool LoginJaExiste(string login)
+        {
+            using (var conn = DatabaseConnection.GetConnection())
+            {
+                conn.Open();
+                string sql = "SELECT COUNT(*) FROM usuarios WHERE login = @login";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@login", login);
+                    long count = (long)cmd.ExecuteScalar();
+                    return count > 0;
+                }
+            }
         }
     }
 }
