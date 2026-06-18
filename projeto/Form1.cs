@@ -605,7 +605,7 @@ namespace projeto
 
                 MessageBox.Show("Usuário cadastrado com sucesso!");
 
-                txtNomeDoUsuario.Clear();
+                txtNomeUsuario.Clear();
                 txtLoginUsuario.Clear();
                 txtSenhaUsuario.Clear();
                 AtualizarListaUsuarios();

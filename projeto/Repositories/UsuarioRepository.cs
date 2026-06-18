@@ -1,13 +1,9 @@
-﻿using projeto.Data;
-using projeto.Models;
-using System.Data.SQLite;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using projeto.Models;
 using projeto.Data;
- 
+
 namespace projeto.Repositories
 {
     public class UsuarioRepository
@@ -69,7 +65,7 @@ namespace projeto.Repositories
                     }
                 }
             }
-            return null; // login não encontrado
+            return null;
         }
 
         public List<Usuario> ObterTodos()
@@ -104,14 +100,12 @@ namespace projeto.Repositories
         }
 
         // Confere se a senha digitada bate com o hash guardado.
-        // O BCrypt faz essa comparação sem nunca descriptografar nada.
         public bool ValidarSenha(string senhaDigitada, string hashGuardado)
         {
             return BCrypt.Net.BCrypt.Verify(senhaDigitada, hashGuardado);
         }
 
         // Busca os 3 papéis fixos do sistema, para popular o ComboBox
-        // na tela de cadastro de usuário (Visualizador, Operador, Admin)
         public List<Papel> ObterPapeis()
         {
             var lista = new List<Papel>();
@@ -135,9 +129,7 @@ namespace projeto.Repositories
             return lista;
         }
 
-        // Verifica se já existe algum usuário com esse login (evita
-        // duplicidade — login é UNIQUE no banco, mas é melhor avisar
-        // com mensagem clara do que deixar o SQLite estourar exception)
+        // Verifica se já existe algum usuário com esse login
         public bool LoginJaExiste(string login)
         {
             using (var conn = DatabaseConnection.GetConnection())
