@@ -67,6 +67,10 @@ namespace projeto
 
             btnAplicarUpgrade.Enabled = podeEscrever;
             btnRemoverPeca.Enabled = podeEscrever;
+                   
+            //if pra nao deixar todo mundo ver a tela de usuarios
+            if (!SessaoUsuario.EhAdmin)
+                clientes.TabPages.Remove(tabUsuarios);
         }
 
         // ===================== CLIENTES =====================
