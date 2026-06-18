@@ -1,34 +1,42 @@
 ﻿using System;
 
-
 namespace projeto.Models
 {
     public class Locacao
     {
-        public Cliente Cliente { get; set; }
-        public Item Item { get; set; }
+        public int Id { get; set; }
+        public int ClienteId { get; set; }
+        public int ItemId { get; set; }
+        public string NomeCliente { get; set; }
+        public string NomeItem { get; set; }
         public DateTime DataRetirada { get; set; }
         public DateTime DataPrevistaDevolucao { get; set; }
-        public decimal ValorTotal { get; private set; }
-        public bool Ativa { get; private set; }
+        public decimal ValorTotal { get; set; }
+        public bool Ativa { get; set; }
 
         public Locacao(Cliente cliente, Item item, DateTime dataRetirada, DateTime dataPrevistaDevolucao)
         {
-            Cliente = cliente;
-            Item = item;
+            ClienteId = cliente.Id;
+            ItemId = item.Id;
+            NomeCliente = cliente.Nome;
+            NomeItem = item.Nome;
             DataRetirada = dataRetirada;
             DataPrevistaDevolucao = dataPrevistaDevolucao;
             Ativa = true;
-            CalcularValorTotal();
+            ValorTotal = CalcularValorTotal(item.ValorDiario, dataRetirada, dataPrevistaDevolucao);
         }
 
-        private void CalcularValorTotal()
+        public Locacao()
         {
-            TimeSpan diferenca = DataPrevistaDevolucao.Date - DataRetirada.Date;
+        }
+
+        private static decimal CalcularValorTotal(decimal valorDiario, DateTime retirada, DateTime devolucaoPrevista)
+        {
+            TimeSpan diferenca = devolucaoPrevista.Date - retirada.Date;
             int dias = diferenca.Days;
             if (dias <= 0) dias = 1;
 
-            ValorTotal = dias * Item.ValorDiario;
+            return dias * valorDiario;
         }
 
         public void RegistrarDevolucao()
@@ -38,9 +46,7 @@ namespace projeto.Models
 
         public override string ToString()
         {
-            
-            return $"{this.Cliente.Nome} -> {this.Item.Nome}";
+            return $"{NomeCliente} -> {NomeItem} (Total: R$ {ValorTotal:N2})";
         }
-
     }
 }

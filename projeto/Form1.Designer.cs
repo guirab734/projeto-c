@@ -30,6 +30,8 @@
         {
             clientes = new TabControl();
             tabPage1 = new TabPage();
+            btnExcluirCliente = new Button();
+            btnEditarCliente = new Button();
             lstClientes = new ListBox();
             btnCadastrarCliente = new Button();
             txtContatoCliente = new TextBox();
@@ -37,6 +39,8 @@
             label2 = new Label();
             label1 = new Label();
             tabPage2 = new TabPage();
+            btnExcluirItem = new Button();
+            btnEditarItem = new Button();
             lstItens = new ListBox();
             btnCadastrarItem = new Button();
             label6 = new Label();
@@ -46,8 +50,8 @@
             label4 = new Label();
             label3 = new Label();
             tabPage3 = new TabPage();
+            btnRemoverPeca = new Button();
             btnAplicarUpgrade = new Button();
-       
             lstPecasAtuais = new ListBox();
             label5 = new Label();
             cmbSetupsUpgrade = new ComboBox();
@@ -63,6 +67,7 @@
             label7 = new Label();
             cmbItens = new ComboBox();
             cmbClientes = new ComboBox();
+            btnExcluirLocacao = new Button();
             clientes.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -86,6 +91,8 @@
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(btnExcluirCliente);
+            tabPage1.Controls.Add(btnEditarCliente);
             tabPage1.Controls.Add(lstClientes);
             tabPage1.Controls.Add(btnCadastrarCliente);
             tabPage1.Controls.Add(txtContatoCliente);
@@ -100,6 +107,26 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "clientes";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // btnExcluirCliente
+            // 
+            btnExcluirCliente.Location = new Point(208, 315);
+            btnExcluirCliente.Name = "btnExcluirCliente";
+            btnExcluirCliente.Size = new Size(211, 41);
+            btnExcluirCliente.TabIndex = 3;
+            btnExcluirCliente.Text = "Excluir Cliente";
+            btnExcluirCliente.UseVisualStyleBackColor = true;
+            btnExcluirCliente.Click += btnExcluirCliente_Click;
+            // 
+            // btnEditarCliente
+            // 
+            btnEditarCliente.Location = new Point(208, 259);
+            btnEditarCliente.Name = "btnEditarCliente";
+            btnEditarCliente.Size = new Size(211, 41);
+            btnEditarCliente.TabIndex = 3;
+            btnEditarCliente.Text = "Editar Cliente";
+            btnEditarCliente.UseVisualStyleBackColor = true;
+            btnEditarCliente.Click += btnEditarCliente_Click;
             // 
             // lstClientes
             // 
@@ -158,6 +185,8 @@
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(btnExcluirItem);
+            tabPage2.Controls.Add(btnEditarItem);
             tabPage2.Controls.Add(lstItens);
             tabPage2.Controls.Add(btnCadastrarItem);
             tabPage2.Controls.Add(label6);
@@ -175,18 +204,38 @@
             tabPage2.Text = "setups";
             tabPage2.UseVisualStyleBackColor = true;
             // 
+            // btnExcluirItem
+            // 
+            btnExcluirItem.Location = new Point(364, 365);
+            btnExcluirItem.Name = "btnExcluirItem";
+            btnExcluirItem.Size = new Size(82, 23);
+            btnExcluirItem.TabIndex = 5;
+            btnExcluirItem.Text = "Excluir Setup";
+            btnExcluirItem.UseVisualStyleBackColor = true;
+            btnExcluirItem.Click += btnExcluirItem_Click;
+            // 
+            // btnEditarItem
+            // 
+            btnEditarItem.Location = new Point(364, 336);
+            btnEditarItem.Name = "btnEditarItem";
+            btnEditarItem.Size = new Size(82, 23);
+            btnEditarItem.TabIndex = 5;
+            btnEditarItem.Text = "Editar Setup";
+            btnEditarItem.UseVisualStyleBackColor = true;
+            btnEditarItem.Click += btnEditarItem_Click;
+            // 
             // lstItens
             // 
             lstItens.FormattingEnabled = true;
-            lstItens.Location = new Point(508, 52);
+            lstItens.Location = new Point(486, 39);
             lstItens.Margin = new Padding(3, 2, 3, 2);
             lstItens.Name = "lstItens";
-            lstItens.Size = new Size(132, 289);
+            lstItens.Size = new Size(132, 349);
             lstItens.TabIndex = 4;
             // 
             // btnCadastrarItem
             // 
-            btnCadastrarItem.Location = new Point(354, 322);
+            btnCadastrarItem.Location = new Point(364, 309);
             btnCadastrarItem.Margin = new Padding(3, 2, 3, 2);
             btnCadastrarItem.Name = "btnCadastrarItem";
             btnCadastrarItem.Size = new Size(82, 22);
@@ -252,8 +301,8 @@
             // 
             // tabPage3
             // 
+            tabPage3.Controls.Add(btnRemoverPeca);
             tabPage3.Controls.Add(btnAplicarUpgrade);
-          
             tabPage3.Controls.Add(lstPecasAtuais);
             tabPage3.Controls.Add(label5);
             tabPage3.Controls.Add(cmbSetupsUpgrade);
@@ -266,6 +315,16 @@
             tabPage3.Text = "upgrade";
             tabPage3.UseVisualStyleBackColor = true;
             // 
+            // btnRemoverPeca
+            // 
+            btnRemoverPeca.Location = new Point(377, 278);
+            btnRemoverPeca.Name = "btnRemoverPeca";
+            btnRemoverPeca.Size = new Size(133, 59);
+            btnRemoverPeca.TabIndex = 4;
+            btnRemoverPeca.Text = "Remover Peça Selecionada";
+            btnRemoverPeca.UseVisualStyleBackColor = true;
+            btnRemoverPeca.Click += btnRemoverPeca_Click;
+            // 
             // btnAplicarUpgrade
             // 
             btnAplicarUpgrade.Location = new Point(377, 194);
@@ -276,7 +335,6 @@
             btnAplicarUpgrade.Text = "aplicar";
             btnAplicarUpgrade.UseVisualStyleBackColor = true;
             btnAplicarUpgrade.Click += btnAplicarUpgrade_Click_1;
-
             // 
             // lstPecasAtuais
             // 
@@ -310,6 +368,7 @@
             // 
             // tabPage4
             // 
+            tabPage4.Controls.Add(btnExcluirLocacao);
             tabPage4.Controls.Add(lstLocacoes);
             tabPage4.Controls.Add(btnDevolver);
             tabPage4.Controls.Add(btnRegistrarLocacao);
@@ -435,6 +494,16 @@
             cmbClientes.Size = new Size(133, 23);
             cmbClientes.TabIndex = 0;
             // 
+            // btnExcluirLocacao
+            // 
+            btnExcluirLocacao.Location = new Point(621, 251);
+            btnExcluirLocacao.Name = "btnExcluirLocacao";
+            btnExcluirLocacao.Size = new Size(232, 23);
+            btnExcluirLocacao.TabIndex = 5;
+            btnExcluirLocacao.Text = "Excluir Locação";
+            btnExcluirLocacao.UseVisualStyleBackColor = true;
+            btnExcluirLocacao.Click += btnExcluirLocacao_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -444,6 +513,7 @@
             Margin = new Padding(3, 2, 3, 2);
             Name = "Form1";
             Text = "Form1";
+            //Load += Form1_Load;
             clientes.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
@@ -493,5 +563,11 @@
         private Button btnAplicarUpgrade;
  
         private ListBox lstPecasAtuais;
+        private Button btnExcluirCliente;
+        private Button btnEditarCliente;
+        private Button btnExcluirItem;
+        private Button btnEditarItem;
+        private Button btnRemoverPeca;
+        private Button btnExcluirLocacao;
     }
 }

@@ -11,7 +11,7 @@ namespace projeto
         {
             ApplicationConfiguration.Initialize();
 
-            // LINHA DO SÊNIOR: Cria o banco e a tabela antes da tela abrir!
+            // Cria o banco e a tabela antes da tela abrir!
             DatabaseConnection.InicializarBanco();
 
             Application.Run(new FormLogin());

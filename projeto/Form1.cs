@@ -1,25 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using projeto.Models;
 using projeto.Repositories;
+using projeto.Services;
 
 namespace projeto
-{//oi
+{
     public partial class Form1 : Form
     {
-        // Bancos de dados temporários na memória
-        private List<Item> listaItens = new List<Item>();
-        private List<Locacao> listaLocacoes = new List<Locacao>();
+        private readonly ClienteService _clienteService = new ClienteService();
+        private readonly ItemService _itemService = new ItemService();
+        private readonly LocacaoService _locacaoService = new LocacaoService();
+
+        // Guarda o cliente/item atualmente selecionado na lista, para os
+        // botões de Editar/Excluir saberem sobre qual registro agir.
+        private Cliente _clienteSelecionado = null;
+        private Item _itemSelecionado = null;
 
         public Form1()
         {
             InitializeComponent();
 
-            // Ativa o banco de dados
-            projeto.Data.DatabaseConnection.InicializarBanco();
-
-            // Configura os textos exibidos
             cmbClientes.DisplayMember = "Nome";
             cmbItens.DisplayMember = "Nome";
             cmbSetupsUpgrade.DisplayMember = "Nome";
@@ -27,22 +30,46 @@ namespace projeto
             lstClientes.DisplayMember = "Nome";
             lstItens.DisplayMember = "Nome";
 
-            // Carrega os clientes salvos do banco
             AtualizarListasClientes();
-
-            // Dá o start nas listas de setups e locações (mesmo que vazias no início)
             AtualizarListasItens();
             AtualizarListagemLocacoes();
+
+            // Conecta os eventos de seleção nas listas (preenche os campos
+            // automaticamente quando o usuário clica num item da lista)
+            lstClientes.SelectedIndexChanged += lstClientes_SelectedIndexChanged;
+            lstItens.SelectedIndexChanged += lstItens_SelectedIndexChanged;
+
+            AplicarPermissoesDeTela();
         }
 
+        // ===================== RBAC NA TELA =====================
+        private void AplicarPermissoesDeTela()
+        {
+            bool podeEscrever = SessaoUsuario.PodeEscreverNoDominio;
+
+            btnCadastrarCliente.Enabled = podeEscrever;
+            btnEditarCliente.Enabled = podeEscrever;
+            btnExcluirCliente.Enabled = podeEscrever;
+
+            btnCadastrarItem.Enabled = podeEscrever;
+            btnEditarItem.Enabled = podeEscrever;
+            btnExcluirItem.Enabled = podeEscrever;
+
+            btnRegistrarLocacao.Enabled = podeEscrever;
+            btnDevolver.Enabled = podeEscrever;
+            btnExcluirLocacao.Enabled = podeEscrever;
+
+            btnAplicarUpgrade.Enabled = podeEscrever;
+            btnRemoverPeca.Enabled = podeEscrever;
+        }
+
+        // ===================== CLIENTES =====================
         private void AtualizarListasClientes()
         {
             try
             {
-                ClienteRepository repo = new ClienteRepository();
-                List<Cliente> listaDoBanco = repo.ObterTodos();
+                List<Cliente> listaDoBanco = _clienteService.ObterTodos();
 
-                // Atualiza o ListBox e o ComboBox da tela
                 lstClientes.DataSource = null;
                 lstClientes.DataSource = listaDoBanco;
 
@@ -55,7 +82,18 @@ namespace projeto
             }
         }
 
-        // CLIENTES - Cadastrar
+        // Quando o usuário clica num cliente na lista, preenche os campos
+        // de texto com os dados dele — assim Editar/Excluir sabem o alvo.
+        private void lstClientes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _clienteSelecionado = lstClientes.SelectedItem as Cliente;
+            if (_clienteSelecionado != null)
+            {
+                txtNomeCliente.Text = _clienteSelecionado.Nome;
+                txtContatoCliente.Text = _clienteSelecionado.Contato;
+            }
+        }
+
         private void btnCadastrarCliente_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNomeCliente.Text))
@@ -67,8 +105,7 @@ namespace projeto
             try
             {
                 Cliente novoCliente = new Cliente(txtNomeCliente.Text, txtContatoCliente.Text);
-                ClienteRepository repo = new ClienteRepository();
-                repo.Salvar(novoCliente);
+                _clienteService.Salvar(novoCliente);
 
                 MessageBox.Show("Cliente salvo no banco de dados!");
 
@@ -76,15 +113,118 @@ namespace projeto
                 txtContatoCliente.Clear();
                 AtualizarListasClientes();
             }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             catch (Exception ex)
             {
                 MessageBox.Show("Erro ao salvar: " + ex.Message);
             }
-
-
         }
 
-        // SETUP - Cadastrar
+        // CLIENTE - Editar
+        private void btnEditarCliente_Click(object sender, EventArgs e)
+        {
+            if (_clienteSelecionado == null)
+            {
+                MessageBox.Show("Selecione um cliente na lista para editar.");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtNomeCliente.Text))
+            {
+                MessageBox.Show("O nome não pode ficar vazio.");
+                return;
+            }
+
+            try
+            {
+                _clienteSelecionado.Nome = txtNomeCliente.Text;
+                _clienteSelecionado.Contato = txtContatoCliente.Text;
+                _clienteService.Atualizar(_clienteSelecionado);
+
+                MessageBox.Show("Cliente atualizado com sucesso!");
+                AtualizarListasClientes();
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao atualizar: " + ex.Message);
+            }
+        }
+
+        // CLIENTE - Excluir
+        private void btnExcluirCliente_Click(object sender, EventArgs e)
+        {
+            if (_clienteSelecionado == null)
+            {
+                MessageBox.Show("Selecione um cliente na lista para excluir.");
+                return;
+            }
+
+            var confirmacao = MessageBox.Show(
+                $"Tem certeza que deseja excluir o cliente '{_clienteSelecionado.Nome}'?",
+                "Confirmar exclusão", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirmacao != DialogResult.Yes) return;
+
+            try
+            {
+                _clienteService.Excluir(_clienteSelecionado.Id);
+
+                MessageBox.Show("Cliente excluído com sucesso!");
+                txtNomeCliente.Clear();
+                txtContatoCliente.Clear();
+                _clienteSelecionado = null;
+                AtualizarListasClientes();
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao excluir: " + ex.Message);
+            }
+        }
+
+        // ===================== SETUPS (ITEM) =====================
+        private void AtualizarListasItens()
+        {
+            try
+            {
+                List<Item> listaDoBanco = _itemService.ObterTodos();
+
+                lstItens.DataSource = null;
+                lstItens.DataSource = listaDoBanco;
+
+                cmbItens.DataSource = null;
+                cmbItens.DataSource = listaDoBanco;
+
+                cmbSetupsUpgrade.DataSource = null;
+                cmbSetupsUpgrade.DataSource = listaDoBanco;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar setups do banco: " + ex.Message);
+            }
+        }
+
+        private void lstItens_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _itemSelecionado = lstItens.SelectedItem as Item;
+            if (_itemSelecionado != null)
+            {
+                txtNomeItem.Text = _itemSelecionado.Nome;
+                txtValorDiario.Text = _itemSelecionado.ValorDiario.ToString();
+                txtComponentesIniciais.Text = string.Join(", ", _itemSelecionado.Componentes);
+            }
+        }
+
         private void btnCadastrarItem_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtNomeItem.Text) || !decimal.TryParse(txtValorDiario.Text, out decimal valorDiario))
@@ -93,62 +233,112 @@ namespace projeto
                 return;
             }
 
-            Item novoItem = new Item(txtNomeItem.Text, valorDiario);
-
-            if (!string.IsNullOrWhiteSpace(txtComponentesIniciais.Text))
+            try
             {
-                string[] pecas = txtComponentesIniciais.Text.Split(',');
-                foreach (var peca in pecas)
+                Item novoItem = new Item(txtNomeItem.Text, valorDiario);
+
+                if (!string.IsNullOrWhiteSpace(txtComponentesIniciais.Text))
                 {
-                    novoItem.Componentes.Add(peca.Trim());
+                    string[] pecas = txtComponentesIniciais.Text.Split(',');
+                    foreach (var peca in pecas)
+                    {
+                        novoItem.Componentes.Add(peca.Trim());
+                    }
                 }
+
+                _itemService.Salvar(novoItem);
+                AtualizarListasItens();
+
+                txtNomeItem.Clear();
+                txtValorDiario.Clear();
+                txtComponentesIniciais.Clear();
+                MessageBox.Show("Setup de hardware cadastrado com sucesso!");
             }
-
-
-            listaItens.Add(novoItem);
-            AtualizarListasItens();
-
-            txtNomeItem.Clear();
-            txtValorDiario.Clear();
-            txtComponentesIniciais.Clear();
-            MessageBox.Show("Setup de hardware cadastrado com sucesso!");
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao salvar setup: " + ex.Message);
+            }
         }
 
-        private void AtualizarListasItens()
+        // SETUP - Editar (nome e valor diário; componentes são tratados na aba Upgrade)
+        private void btnEditarItem_Click(object sender, EventArgs e)
         {
-            // Criamos uma lista de exibição que garante que o nome seja pego corretamente
-            // Isso evita que o Windows Forms se perca tentando ler o objeto complexo
-
-            // Para o ListBox
-            lstItens.DataSource = null;
-            lstItens.Items.Clear();
-            foreach (var item in listaItens)
+            if (_itemSelecionado == null)
             {
-                lstItens.Items.Add(item.Nome); // Adicionamos apenas o nome como texto
+                MessageBox.Show("Selecione um setup na lista para editar.");
+                return;
             }
 
-            // Para o ComboBox de Itens
-            cmbItens.DataSource = null;
-            cmbItens.Items.Clear();
-            foreach (var item in listaItens)
+            if (string.IsNullOrWhiteSpace(txtNomeItem.Text) || !decimal.TryParse(txtValorDiario.Text, out decimal valorDiario))
             {
-                cmbItens.Items.Add(item.Nome);
+                MessageBox.Show("Insira um nome válido e um valor de diária numérico.");
+                return;
             }
 
-            // Para o ComboBox de Upgrades
-            cmbSetupsUpgrade.DataSource = null;
-            cmbSetupsUpgrade.Items.Clear();
-            foreach (var item in listaItens)
+            try
             {
-                cmbSetupsUpgrade.Items.Add(item.Nome);
+                _itemSelecionado.Nome = txtNomeItem.Text;
+                _itemSelecionado.ValorDiario = valorDiario;
+                _itemService.Atualizar(_itemSelecionado);
+
+                MessageBox.Show("Setup atualizado com sucesso!");
+                AtualizarListasItens();
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao atualizar setup: " + ex.Message);
             }
         }
 
-        // LOCAÇÃO - Registrar
+        // SETUP - Excluir
+        private void btnExcluirItem_Click(object sender, EventArgs e)
+        {
+            if (_itemSelecionado == null)
+            {
+                MessageBox.Show("Selecione um setup na lista para excluir.");
+                return;
+            }
+
+            var confirmacao = MessageBox.Show(
+                $"Tem certeza que deseja excluir o setup '{_itemSelecionado.Nome}'?",
+                "Confirmar exclusão", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirmacao != DialogResult.Yes) return;
+
+            try
+            {
+                _itemService.Excluir(_itemSelecionado.Id);
+
+                MessageBox.Show("Setup excluído com sucesso!");
+                txtNomeItem.Clear();
+                txtValorDiario.Clear();
+                txtComponentesIniciais.Clear();
+                _itemSelecionado = null;
+                AtualizarListasItens();
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao excluir setup: " + ex.Message);
+            }
+        }
+
+        // ===================== LOCAÇÕES =====================
         private void btnRegistrarLocacao_Click(object sender, EventArgs e)
         {
-            projeto.Models.Cliente clienteSel = (projeto.Models.Cliente)cmbClientes.SelectedItem;
-            projeto.Models.Item itemSel = (projeto.Models.Item)cmbItens.SelectedItem;
+            Cliente clienteSel = (Cliente)cmbClientes.SelectedItem;
+            Item itemSel = (Item)cmbItens.SelectedItem;
 
             if (clienteSel == null || itemSel == null)
             {
@@ -156,42 +346,97 @@ namespace projeto
                 return;
             }
 
-            Locacao novaLocacao = new Locacao(clienteSel, itemSel, dtpRetirada.Value, dtpDevolucao.Value);
-            listaLocacoes.Add(novaLocacao);
+            try
+            {
+                Locacao novaLocacao = new Locacao(clienteSel, itemSel, dtpRetirada.Value, dtpDevolucao.Value);
+                _locacaoService.Registrar(novaLocacao);
 
-            AtualizarListagemLocacoes();
-            MessageBox.Show($"Locação salva com sucesso!\nValor Total: R$ {novaLocacao.ValorTotal:N2}");
+                AtualizarListagemLocacoes();
+                MessageBox.Show($"Locação salva com sucesso!\nValor Total: R$ {novaLocacao.ValorTotal:N2}");
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao registrar locação: " + ex.Message);
+            }
         }
 
-        // LOCAÇÃO - Devolver
         private void btnDevolver_Click(object sender, EventArgs e)
         {
-            int index = lstLocacoes.SelectedIndex;
-            if (index < 0)
+            Locacao locacaoSel = (Locacao)lstLocacoes.SelectedItem;
+            if (locacaoSel == null)
             {
                 MessageBox.Show("Selecione uma locação ativa na lista para realizar a devolução.");
                 return;
             }
 
-            List<Locacao> ativas = listaLocacoes.FindAll(l => l.Ativa);
-            if (index < ativas.Count)
+            try
             {
-                ativas[index].RegistrarDevolucao();
+                _locacaoService.RegistrarDevolucao(locacaoSel.Id);
                 AtualizarListagemLocacoes();
                 MessageBox.Show("Devolução concluída! O equipamento retornou ao estoque.");
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao registrar devolução: " + ex.Message);
+            }
+        }
+
+        // LOCAÇÃO - Excluir (cancelar locação cadastrada por erro)
+        private void btnExcluirLocacao_Click(object sender, EventArgs e)
+        {
+            Locacao locacaoSel = (Locacao)lstLocacoes.SelectedItem;
+            if (locacaoSel == null)
+            {
+                MessageBox.Show("Selecione uma locação na lista para excluir.");
+                return;
+            }
+
+            var confirmacao = MessageBox.Show(
+                $"Tem certeza que deseja excluir esta locação?\n{locacaoSel}",
+                "Confirmar exclusão", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirmacao != DialogResult.Yes) return;
+
+            try
+            {
+                _locacaoService.Excluir(locacaoSel.Id);
+                AtualizarListagemLocacoes();
+                MessageBox.Show("Locação excluída com sucesso!");
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao excluir locação: " + ex.Message);
             }
         }
 
         private void AtualizarListagemLocacoes()
         {
-            // Filtra apenas as locações que ainda estão ativas
-            List<Locacao> ativas = listaLocacoes.FindAll(l => l.Ativa);
+            try
+            {
+                List<Locacao> ativas = _locacaoService.ObterAtivas();
 
-            lstLocacoes.DataSource = null;
-            lstLocacoes.DataSource = ativas; // O ToString que colocamos na classe Locacao vai cuidar do texto!
+                lstLocacoes.DataSource = null;
+                lstLocacoes.DataSource = ativas;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao carregar locações do banco: " + ex.Message);
+            }
         }
 
-        // UPGRADE - Mudança de PC
+        // ===================== UPGRADE =====================
         private void cmbSetupsUpgrade_SelectedIndexChanged(object sender, EventArgs e)
         {
             Item setupSel = (Item)cmbSetupsUpgrade.SelectedItem;
@@ -205,7 +450,6 @@ namespace projeto
             }
         }
 
-        // UPGRADE - Aplicar Peça Nova (Conectado com o Designer _1)
         private void btnAplicarUpgrade_Click_1(object sender, EventArgs e)
         {
             Item setupSel = (Item)cmbSetupsUpgrade.SelectedItem;
@@ -215,20 +459,78 @@ namespace projeto
                 return;
             }
 
-            string pecaTexto = Microsoft.VisualBasic.Interaction.InputBox("Digite o nome da nova peça para o Upgrade:", "Novo Componente", "");
+            string pecaTexto = Microsoft.VisualBasic.Interaction.InputBox(
+                "Digite o nome da nova peça para o Upgrade:", "Novo Componente", "");
 
             if (string.IsNullOrWhiteSpace(pecaTexto)) return;
 
-            bool estaAlugado = listaLocacoes.Exists(l => l.Item == setupSel && l.Ativa);
-            if (estaAlugado)
+            try
             {
-                MessageBox.Show("❌ Bloqueado! Este computador está atualmente alugado por um cliente.", "Aviso");
+                bool estaAlugado = _locacaoService.ItemEstaAlugado(setupSel.Id);
+                if (estaAlugado)
+                {
+                    MessageBox.Show("❌ Bloqueado! Este computador está atualmente alugado por um cliente.", "Aviso");
+                    return;
+                }
+
+                setupSel.Componentes.Add(pecaTexto.Trim());
+                _itemService.AtualizarComponentes(setupSel);
+
+                cmbSetupsUpgrade_SelectedIndexChanged(this, EventArgs.Empty);
+                MessageBox.Show("⚡ Upgrade concluído com sucesso!");
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao aplicar upgrade: " + ex.Message);
+            }
+        }
+
+        // UPGRADE - Remover peça selecionada na lista lstPecasAtuais
+        private void btnRemoverPeca_Click(object sender, EventArgs e)
+        {
+            Item setupSel = (Item)cmbSetupsUpgrade.SelectedItem;
+            if (setupSel == null)
+            {
+                MessageBox.Show("Selecione um setup primeiro.");
                 return;
             }
 
-            setupSel.Componentes.Add(pecaTexto.Trim());
-            cmbSetupsUpgrade_SelectedIndexChanged(this, EventArgs.Empty);
-            MessageBox.Show("⚡ Upgrade concluído com sucesso!");
+            if (lstPecasAtuais.SelectedItem == null)
+            {
+                MessageBox.Show("Selecione, na lista de componentes, a peça que deseja remover.");
+                return;
+            }
+
+            string pecaSelecionada = lstPecasAtuais.SelectedItem.ToString();
+
+            try
+            {
+                bool estaAlugado = _locacaoService.ItemEstaAlugado(setupSel.Id);
+                if (estaAlugado)
+                {
+                    MessageBox.Show("❌ Bloqueado! Este computador está atualmente alugado por um cliente.", "Aviso");
+                    return;
+                }
+
+                // Remove apenas a primeira ocorrência exata da peça selecionada
+                setupSel.Componentes.Remove(pecaSelecionada);
+                _itemService.AtualizarComponentes(setupSel);
+
+                cmbSetupsUpgrade_SelectedIndexChanged(this, EventArgs.Empty);
+                MessageBox.Show("Peça removida com sucesso!");
+            }
+            catch (AcessoNegadoException ex)
+            {
+                MessageBox.Show(ex.Message, "Acesso negado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erro ao remover peça: " + ex.Message);
+            }
         }
     }
 }
