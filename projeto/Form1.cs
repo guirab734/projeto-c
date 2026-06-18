@@ -575,7 +575,7 @@ namespace projeto
 
         private void btnCadastrarUsuario_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNomeDoUsuario.Text) ||
+            if (string.IsNullOrWhiteSpace(txtNomeUsuario.Text) ||
                 string.IsNullOrWhiteSpace(txtLoginUsuario.Text) ||
                 string.IsNullOrWhiteSpace(txtSenhaUsuario.Text))
             {
@@ -594,7 +594,7 @@ namespace projeto
             {
                 var novoUsuario = new Usuario
                 {
-                    Nome = txtNomeDoUsuario.Text,
+                    Nome = txtNomeUsuario.Text,
                     Login = txtLoginUsuario.Text,
                     PapelId = papelSel.Id
                 };
