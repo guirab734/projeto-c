@@ -1,3 +1,5 @@
+using MaterialSkin;
+using MaterialSkin.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +8,11 @@ using projeto.Models;
 using projeto.Repositories;
 using projeto.Services;
 
+
+
 namespace projeto
 {
-    public partial class Form1 : Form
+    public partial class Form1 : MaterialForm
     {
         private readonly ClienteService _clienteService = new ClienteService();
         private readonly ItemService _itemService = new ItemService();
@@ -23,6 +27,34 @@ namespace projeto
         {
             InitializeComponent();
 
+            // =======================================================
+            // 1. CONFIGURAÇÃO DO TEMA GAMER (PRETO E VERMELHO)
+            // =======================================================
+            var materialSkinManager = MaterialSkinManager.Instance;
+            materialSkinManager.AddFormToManage(this);
+            materialSkinManager.Theme = MaterialSkinManager.Themes.DARK;
+
+            // Cores: Barra chumbo, Fundo escuro, Destaques em Vermelho
+            materialSkinManager.ColorScheme = new ColorScheme(
+                Primary.Grey900,      // Cor principal (Barra superior)
+                Primary.Grey800,      // Fundo
+                Primary.Grey900,      // Cor secundária
+                Accent.Red700,        // Destaques (Botões, linha de texto, abas selecionadas)
+                TextShade.WHITE       // Cor do texto
+            );
+
+            // =======================================================
+            // 2. CONFIGURAÇÃO DA JANELA E MENU LATERAL
+            // =======================================================
+            this.Text = "GGAMES - Gestão de Setups";
+
+            // Transforma o TabControl original no menu lateral
+            DrawerTabControl = clientes;
+            DrawerUseColors = true;
+            DrawerHighlightWithAccent = true; // O item selecionado no menu fica vermelho
+            DrawerAutoShow = true;            // Força o menu a iniciar aberto
+            DrawerShowIconsWhenHidden = false;
+
             cmbClientes.DisplayMember = "Nome";
             cmbItens.DisplayMember = "Nome";
             cmbSetupsUpgrade.DisplayMember = "Nome";
@@ -34,20 +66,41 @@ namespace projeto
             AtualizarListasItens();
             AtualizarListagemLocacoes();
 
-            // NOVO: configura e carrega a aba de usuários
+            // Aba de usuários
             cmbPapelUsuario.DisplayMember = "Nome";
             lstUsuarios.DisplayMember = "Nome";
             CarregarPapeis();
             AtualizarListaUsuarios();
 
-            // Conecta os eventos de seleção nas listas (preenche os campos
-            // automaticamente quando o usuário clica num item da lista)
+            AtualizarMetricas();
+
             lstClientes.SelectedIndexChanged += lstClientes_SelectedIndexChanged;
             lstItens.SelectedIndexChanged += lstItens_SelectedIndexChanged;
 
+
             AplicarPermissoesDeTela();
+
         }
 
+        private void AtualizarMetricas()
+        {
+            try
+            {
+                // Puxa as listas do banco usando os services que você já tem
+                int totalClientes = _clienteService.ObterTodos().Count;
+                int locacoesAtivas = _locacaoService.ObterAtivas().Count;
+                int totalSetups = _itemService.ObterTodos().Count;
+
+                // Joga os números nos labels que você criou na tela
+                lblTotalClientes.Text = $"Total de Clientes: {totalClientes}";
+                lblLocacoesAtivas.Text = $"Locações Ativas: {locacoesAtivas}";
+                lblTotalSetups.Text = $"PCs no Estoque: {totalSetups}";
+            }
+            catch (Exception ex)
+            {
+                // Silencia erro se for só permissão, mas o visualizador tem acesso de leitura
+            }
+        }
         // ===================== RBAC NA TELA =====================
         private void AplicarPermissoesDeTela()
         {
@@ -67,7 +120,7 @@ namespace projeto
 
             btnAplicarUpgrade.Enabled = podeEscrever;
             btnRemoverPeca.Enabled = podeEscrever;
-                   
+
             //if pra nao deixar todo mundo ver a tela de usuarios
             if (!SessaoUsuario.EhAdmin)
                 clientes.TabPages.Remove(tabUsuarios);
@@ -635,6 +688,22 @@ namespace projeto
         }
 
         private void tabUsuarios_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            SessaoUsuario.EncerrarSessao(); // Limpa quem está logado
+            this.Hide(); // Esconde a tela atual
+
+            var formLogin = new FormLogin();
+            formLogin.ShowDialog(); // Mostra o login de novo
+
+            this.Close(); // Fecha o sistema principal definitivamente após o login ser fechado
+        }
+
+        private void materialLabel1_Click(object sender, EventArgs e)
         {
 
         }
